@@ -2,15 +2,23 @@
 const express = require('express');
 const path = require('path');
 const db = require('./dbconn');
-// const bodyparser = require('body-parse');
-//
-// app.use(bodyparser.json());
+const bodyParser = require('body-parser');
 // Create an express app
 const app = express();
 // Create a router
 const router = express.Router();
 // Port
-const port = process.env.port || 4000;
+const port = parseInt(process.env.port) || 4000;
+
+// express.json(): It a middleware
+app.use(router, express.json(), express.urlencoded({
+    extended: true
+}));
+
+app.listen(port, ()=> {
+    console.log(`Server is running on port ${port}`);
+});
+
 // Fetch data
 router.get('^/$|/clinic', (req, res)=> {
     // Query
@@ -30,14 +38,17 @@ router.get('^/$|/clinic', (req, res)=> {
 });
 
 // Fetch one record
-router.get('/clinic/:id', (req, res)=> {
+/*
+SELECT d.id, CONCAT(d.firstname, ' ', d.lastname) 'Doctor Fullname', d.dentistAge, 
+d.contactNumb, d.practiceNumb
+*/
+router.get('^/:id$|/clinic/:id', (req, res)=> {
     // Query
     const strQry = 
     `
-    SELECT d.id, CONCAT(d.firstname, ' ', d.lastname) 'Doctor Fullname', d.dentistAge, 
-    d.contactNumb, d.practiceNumb
-    FROM dentists d
-    WHERE d.id = ?;
+    SELECT *
+    FROM dentists 
+    WHERE id = ?;
     `;
     db.query(strQry,[req.params.id], (err, data)=> {
         if(err) throw err;
@@ -47,21 +58,36 @@ router.get('/clinic/:id', (req, res)=> {
 
 //Post
 // Add a new record
-router.post('/clinic', (req, res)=> {
+router.post('/clinic', bodyParser.json(), (req, res)=> {
+    const dnt = req.body;
     // Query
     const strQry = 
-    `
-    INSERT INTO dentists
-    VALUES(?, ?, ?);
-    `;
-    db.query(strQry,[req.params.id], (err, data)=> {
+    `INSERT INTO dentists(id, firstname, lastname,
+     dentistAge, contactNumb, practiceNumb)
+     VALUES (?, ?, ?, ?, ?, ?);`;
+
+    db.query(strQry,[dnt.id, dnt.firstname,
+        dnt.lastname, dnt.dentistAge, 
+        dnt.contactNumb, dnt.practiceNumb], (err, data)=> {
         if(err) throw err;
-        res.send(data);
+        res.send(data.message);
     })
 });
-
+/*
+Result object:
+{
+  fieldCount: 0,
+  affectedRows: 5,
+  insertId: 0,
+  serverStatus: 2,
+  warningCount: 0,
+  message: '\'Records:5  Duplicated: 0  Warnings: 0',
+  protocol41: true,
+  changedRows: 0
+}
+*/
 //Delete a record
-router.delete('/clinic', (req, res)=> {
+router.delete('/clinic/:id', (req, res)=> {
     // Query
     const strQry = 
     `
@@ -70,15 +96,8 @@ router.delete('/clinic', (req, res)=> {
     `;
     db.query(strQry,[req.params.id], (err, data, fields)=> {
         if(err) throw err;
-        res.send('A row was affected');
+        res.send(`${data.affectedRows} was affected`);
     })
 });
 
 
-// express.json(): It a middleware
-app.use(router, express.json(), express.urlencoded({
-    extended: true
-}));
-app.listen(port, ()=> {
-    console.log(`Server is running on port ${port}`);
-});

@@ -70,10 +70,18 @@ router.post('/clinic', bodyParser.json(), (req, res)=> {
         dnt.lastname, dnt.dentistAge, 
         dnt.contactNumb, dnt.practiceNumb], (err, data)=> {
         if(err) throw err;
-        res.send(data.message);
+        res.send(`Message: ${data.message} and number of affected row/s: ${data.affectedRows}`);
     })
 });
 /*
+{
+    "id": "JT36736254",
+    "firstname": "Joel",
+    "lastname": "Mukanya",
+    "dentistAge": 38,
+    "contactNumb": "9837652417",
+    "practiceNumb": "7365428765"
+}
 Result object:
 {
   fieldCount: 0,
@@ -96,7 +104,21 @@ router.delete('/clinic/:id', (req, res)=> {
     `;
     db.query(strQry,[req.params.id], (err, data, fields)=> {
         if(err) throw err;
-        res.send(`${data.affectedRows} was affected`);
+        res.send(`${data.affectedRows} row was affected`);
+    })
+});
+// Update
+router.put('/clinic', bodyParser.json(), (req, res)=> {
+    const dnt = req.body;
+    // Query
+    const strQry = 
+    `UPDATE dentists
+     SET ?
+     WHERE id = ?`;
+
+    db.query(strQry,[dnt, dnt.id], (err, data)=> {
+        if(err) throw err;
+        res.send(`number of affected record/s: ${data.affectedRows}`);
     })
 });
 

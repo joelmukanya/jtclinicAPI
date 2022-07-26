@@ -2,6 +2,7 @@
 const express = require('express');
 const path = require('path');
 const db = require('./dbconn');
+const cors = require('cors');
 const bodyParser = require('body-parser');
 // Create an express app
 const app = express();
@@ -11,7 +12,7 @@ const router = express.Router();
 const port = parseInt(process.env.port) || 4000;
 
 // express.json(): It a middleware
-app.use(router, express.json(), express.urlencoded({
+app.use(router,cors(), express.json(), express.urlencoded({
     extended: true
 }));
 
@@ -33,7 +34,11 @@ router.get('^/$|/clinic', (req, res)=> {
     `;
     db.query(strQry, (err, data)=> {
         if(err) throw err;
-        res.send(data);
+        // res.send(data);
+        res.json({
+            status: 200,
+            data: data
+        })
     })
 });
 

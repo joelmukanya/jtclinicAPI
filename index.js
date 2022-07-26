@@ -70,7 +70,7 @@ router.post('/clinic', bodyParser.json(), (req, res)=> {
         dnt.lastname, dnt.dentistAge, 
         dnt.contactNumb, dnt.practiceNumb], (err, data)=> {
         if(err) throw err;
-        res.send(`Message: ${data.message} and number of affected row/s: ${data.affectedRows}`);
+        res.send(`number of affected row/s: ${data.affectedRows}`);
     })
 });
 /*

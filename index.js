@@ -10,7 +10,6 @@ const app = express();
 const router = express.Router();
 // Port
 const port = parseInt(process.env.port) || 4000;
-
 // express.json(): It a middleware
 app.use(router,cors(), express.json(), express.urlencoded({
     extended: true
@@ -22,6 +21,7 @@ app.listen(port, ()=> {
 
 // Fetch data
 router.get('^/$|/clinic', (req, res)=> {
+    // res.header("Access-Control-Allow-Origin", "*");
     // Query
     const strQry = 
     `
